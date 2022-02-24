@@ -24,13 +24,13 @@
     <style name="Theme.Organizze.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <!-- Tema da tela de Despesas -->
-        <style name="despesaTheme" parent="Theme.AppCompat.Light.NoActionBar">
-            <item name="windowActionBar">false</item><!-- Faz com que a action bar não apareca -->
-            <item name="windowNoTitle">true</item><!-- Faz com que o titulo não apareça -->
-            <item name="colorPrimary">@color/colorPrimaryDespesa</item>
-            <item name="colorPrimaryDark">@color/colorPrimaryDarkDespesa</item>
-            <item name="colorAccent">@color/colorAccentDespesa</item>
-        </style>
+    <style name="despesaTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item><!-- Faz com que a action bar não apareca -->
+        <item name="windowNoTitle">true</item><!-- Faz com que o titulo não apareça -->
+        <item name="colorPrimary">@color/colorPrimaryDespesa</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkDespesa</item>
+        <item name="colorAccent">@color/colorAccentDespesa</item>
+    </style>
 
     <!-- Tema da tela de Receitas -->
     <style name="receitasTheme" parent="Theme.AppCompat.Light.NoActionBar">
@@ -40,4 +40,13 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDarkReceita</item>
         <item name="colorAccent">@color/colorAccentReceita</item>
     </style>
+
+    <style name="Theme.Organizze.NoActionBar.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Organizze.NoActionBar.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.Organizze.NoActionBar.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
