@@ -4,6 +4,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import br.com.brunno.organizzebird.helper.Base64Custom;
+
 //Usando sempre a mesma instancia de firebase para não criar sempre uma nova instancia
 public class ConfiguracaoFirebase {
 
@@ -25,5 +27,13 @@ public class ConfiguracaoFirebase {
             firebaseDatabase = FirebaseDatabase.getInstance().getReference();
         }
         return firebaseDatabase;
+    }
+
+    public static DatabaseReference getReferenceUser() {
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        DatabaseReference firebaseRef = getFirebaseDatabase();
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+        return usuarioRef;
     }
 }
