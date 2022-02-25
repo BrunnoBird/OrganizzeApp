@@ -30,10 +30,15 @@ public class ConfiguracaoFirebase {
     }
 
     public static DatabaseReference getReferenceUser() {
-        String emailUsuario = autenticacao.getCurrentUser().getEmail();
-        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        String idUsuario = getIDUsuario();
         DatabaseReference firebaseRef = getFirebaseDatabase();
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
         return usuarioRef;
+    }
+
+    public static String getIDUsuario() {
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        return idUsuario;
     }
 }
