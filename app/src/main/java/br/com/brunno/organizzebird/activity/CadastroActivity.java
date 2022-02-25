@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -27,14 +28,17 @@ public class CadastroActivity extends AppCompatActivity {
 
     private EditText campoNome, campoEmail, campoSenha;
     private Button botaoCadastrar;
-    //Acessando m
     private FirebaseAuth autenticacao;
     private Usuario usuario;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro);
+
+        toolbar = findViewById(R.id.toolbarCadastro);
+        toolbar.setTitle("Cadastro");
 
         campoNome = findViewById(R.id.editNome);
         campoEmail = findViewById(R.id.editEmail);

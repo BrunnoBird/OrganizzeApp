@@ -21,7 +21,8 @@
             android:name=".activity.PrincipalActivity"
             android:exported="false"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Organizze" />
+
+            />
         <activity
             android:name=".activity.CadastroActivity"
             android:exported="false" />
