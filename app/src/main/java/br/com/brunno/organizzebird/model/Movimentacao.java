@@ -9,6 +9,7 @@ import br.com.brunno.organizzebird.helper.DateCustom;
 
 public class Movimentacao {
 
+    private String key;
     private String data;
     private String categoria;
     private String descricao;
@@ -31,6 +32,14 @@ public class Movimentacao {
                 .child(mesAno)
                 .push()
                 .setValue(this); //Salva todos esses valores para nós
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getData() {

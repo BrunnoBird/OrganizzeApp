@@ -1,5 +1,6 @@
 package br.com.brunno.organizzebird.activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,10 +9,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -45,6 +49,7 @@ public class PrincipalActivity extends AppCompatActivity {
     private AdapterMovimentacao adapterMovimentacao;
     //Criando uma lista de movimentações com um array vazio
     private List<Movimentacao> movimentacoes = new ArrayList<>();
+    private Movimentacao movimentacao;
     private DatabaseReference firebaseDatabase = ConfiguracaoFirebase.getFirebaseDatabase();
     private DatabaseReference movimentacaoRef;
     private String mesAnoSelecionado;
@@ -72,6 +77,7 @@ public class PrincipalActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerMovimentos);
 
         configuraCalendarView();
+        swipe();
         configuraRecyclerViewMovimentacoes();
     }
 
@@ -83,7 +89,88 @@ public class PrincipalActivity extends AppCompatActivity {
         recuperarMovimentacoes();
     }
 
+    public void swipe() {
+        ItemTouchHelper.Callback itemTouch = new ItemTouchHelper.Callback() {
+            @Override
+            public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+
+                int dragFlags = ItemTouchHelper.ACTION_STATE_IDLE; //Faz com que o movimento fica inativo
+                int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
+                return makeMovementFlags(dragFlags, swipeFlags);
+            }
+
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                //viewHolder -> Conseguimos excluir um item recuperando ele
+                excluirMovimentacao( viewHolder );
+            }
+        };
+
+        //Instanciando no nosso RecyclerView para passar os movimentos
+        new ItemTouchHelper( itemTouch ).attachToRecyclerView( recyclerView );
+    }
+
+    public void excluirMovimentacao(RecyclerView.ViewHolder viewHolder) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("Excluir mobimentação da conta");
+        alertDialog.setMessage("Você tem certeza que deseja realmente excluir esta movimentação da sua conta?");
+        alertDialog.setCancelable(false);
+
+        alertDialog.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                int position = viewHolder.getAdapterPosition(); //Recuepra a posição do item que nós delisarmos
+                movimentacao = movimentacoes.get(position);
+                //Removendo do firebase
+                String idUsuario = ConfiguracaoFirebase.getIDUsuario(); //Recupera ID do usuario
+                //pegamos a referencia das movimentações do mês em questão
+                movimentacaoRef = firebaseDatabase.child("movimentacao")
+                        .child( idUsuario )
+                        .child( mesAnoSelecionado );
+                movimentacaoRef.child( movimentacao.getKey() ).removeValue(); //Acessando a chave da movimentação e removendo
+                adapterMovimentacao.notifyItemRemoved(position); //Atualizando a lista com a nova exclusão
+                //Atualizando o Saldo
+                atualizarSaldo();
+            }
+        });
+
+        alertDialog.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(PrincipalActivity.this,
+                        "Cancelado",
+                        Toast.LENGTH_SHORT).show();
+                adapterMovimentacao.notifyDataSetChanged();
+            }
+        });
+
+        AlertDialog alert = alertDialog.create();
+        alert.show();
+    }
+
+    public void atualizarSaldo() {
+        //Pegando a referencia do usuario que esta logado
+        usuarioRef = ConfiguracaoFirebase.getReferenceUser();
+
+        //Caso excluir uma receita
+        if (movimentacao.getTipo().equals("r")) {
+            receitaTotal = receitaTotal - movimentacao.getValor();
+            usuarioRef.child("receitaTotal").setValue(receitaTotal);
+        }
+
+        if (movimentacao.getTipo().equals("d")) {
+            despesaTotal = despesaTotal - movimentacao.getValor();
+            usuarioRef.child("despesaTotal").setValue(despesaTotal);
+        }
+    }
+
     public void recuperarMovimentacoes() {
+        //Recuperando a referencia do usuario + movimentação
         String idUsuario = ConfiguracaoFirebase.getIDUsuario();
         movimentacaoRef = firebaseDatabase.child("movimentacao")
                 .child( idUsuario )
@@ -95,14 +182,15 @@ public class PrincipalActivity extends AppCompatActivity {
                 //Comecamos limpando nossa lista
                 movimentacoes .clear();
 
-                //Percorrendo todas as movimentacoes pertencentes a data
+                //Percorrendo todas as movimentacoes pertencentes a data em questão (mes + ano) no firebase
                     //getValue pega o objeto inteiro;
                     //getChildren pega todos os filhos de dataSnapshot -> que no caso é todas as minhas movimentacoes;
                 for ( DataSnapshot dados: snapshot.getChildren() ) {
                     Movimentacao movimentacao = dados.getValue( Movimentacao.class );
-
+                    movimentacao.setKey(dados.getKey()); // recuperando a chave da nossa movimentação do firebase
                     //Adicionando no Array as movimentações buscadas
                     movimentacoes.add( movimentacao );
+
                 }
 
                 //Notificando para avisar que os dados foram avisados para o adapter, onde fazemos uso dele via parametro das nossas listas de movimentacoes
